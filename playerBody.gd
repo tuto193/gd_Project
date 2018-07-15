@@ -8,14 +8,15 @@ const GRAVITY = 30
 const MAX_SPEED_FALL = 980
 const MAX_SPEED_X = 460
 const ACCEL_X = 16
-const DECEL_X = 60
+const DECEL_X = 40
 const JUMP_SPEED = -600
 
 # Variables that make platforming more interactive
 var player_speed = Vector2( 0, 0 )
-var doubleJump = 0
-var wallJump = 0
-var direction = 1
+var player_move = Vector2( 0, 0 )
+var doubleJump = 2
+var wallJump = 1
+var input_direction = 1
 var last_direction = 0
 
 func _ready():
@@ -30,9 +31,10 @@ func _input( event ):
 	if Input.is_action_just_pressed("player_UP"):
 		if is_on_floor():
 			player_speed.y = JUMP_SPEED
-		elif doubleJump > 0: # allow for a doublejump
+			doubleJump += 1
+		elif doubleJump < 2: # allow for a doublejump
 			player_speed.y = JUMP_SPEED + 110
-			doubleJump -= 1
+			doubleJump += 1
 	# IMPLEMENT WALL-JUMPING
 	pass
 
@@ -48,11 +50,11 @@ func _process(delta):
 	if !is_on_floor():
 		player_speed.y += GRAVITY
 	else:
-		doubleJump = 1
+		doubleJump = 0
 	
 	if is_on_wall():
-		doubleJump = 1
-		wallJump = 1
+		doubleJump = 0
+		wallJump = 0
 	# Make sure that the vertical_speed is within bounds
 	player_speed.y = clamp( player_speed.y, JUMP_SPEED, MAX_SPEED_FALL)
 
@@ -61,24 +63,26 @@ func _process(delta):
 	#####################################################
 	var move_right = Input.is_action_pressed("player_RIGHT")
 	var move_left = Input.is_action_pressed("player_LEFT")
-	var not_moving = (not move_right) and (not move_left) 
-	# We sort the directional movement of the player
-	# to make the change of direction more realistic
+	# We sort theinput_directional movement of the player
+	# to make the change ofinput_direction more realistic
+	if input_direction != 0:
+		last_direction = input_direction
+
 	if move_right :
-		last_direction = 1
+		input_direction = 1
 	elif move_left:
-		last_direction = -1
-	elif not_moving:
-		last_direction = 0
-	# Process lateral movement after processing direction changes
-	# If player is in the middle of changing directions
-	if (move_left or move_right) and last_direction:
-		if last_direction == -direction:
+		input_direction = -1
+	else:
+		input_direction = 0
+	# Process lateral movement after processinginput_direction changes
+	# If player is in the middle of changinginput_directions
+	if last_direction == -input_direction:
+		if is_on_floor():
+			player_speed.x /= 2.8
+		else:
 			player_speed.x /= 4
-			direction = last_direction
-	
 	# Accelerate (or decelarate) accordingly
-	if last_direction: #just when we actually started moving
+	if input_direction != 0: #just when we actually started moving
 		if is_on_floor():
 			player_speed.x += ACCEL_X
 		else:
@@ -88,7 +92,8 @@ func _process(delta):
 	
 	# We also need to clamp it
 	player_speed.x = clamp( player_speed.x, 0, MAX_SPEED_X )
-	player_speed.x *= direction
+	player_move = player_speed
+	player_move.x *= last_direction
 	# The player movement method is then updated
-	move_and_slide( player_speed, UP )
+	move_and_slide( player_move, UP )
 	pass
