@@ -92,6 +92,8 @@ func _process(delta):
 	
 	# We also need to clamp it
 	player_speed.x = clamp( player_speed.x, 0, MAX_SPEED_X )
+	# Player speed and movement should be updated separately, due to the update process of the speed
+	# (if it's negative, then it will just go back to 0 the next frame)
 	player_move = player_speed
 	player_move.x *= last_direction
 	# The player movement method is then updated
