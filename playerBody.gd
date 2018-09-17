@@ -1,8 +1,5 @@
 extends KinematicBody2D
 
-# class member variables go here, for example:
-
-# Constants that facilitate movement
 const UP = Vector2( 0, -1 )
 const GRAVITY = 30
 const MAX_SPEED_FALL = 980
@@ -11,7 +8,6 @@ const ACCEL_X = 16
 const DECEL_X = 40
 const JUMP_SPEED = -600
 
-# Variables that make platforming more interactive
 var player_speed = Vector2( 0, 0 )
 var player_move = Vector2( 0, 0 )
 var doubleJump = 2
